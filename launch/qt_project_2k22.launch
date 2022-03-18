@@ -1,0 +1,4 @@
+<launch>
+  <node name="qt_project_2k22_node" pkg="qt_project_2k22" type="tutorial.py" output="screen">
+  </node>
+</launch>
