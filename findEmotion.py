@@ -43,7 +43,7 @@ if __name__ == '__main__':
         selectedEmotion = selectRandomEmotion()
         emotionShow(selectedEmotion)
         speechSay('#CAR HORN#')
-        resp = recognize("fr_FR", ['joyeux', 'surpris', 'triste','peur','énervé'], 30)
+        resp = recognize("fr_FR", ['joyeux', 'surpris', 'triste','peur','énervé'], 15)
         rospy.loginfo("Voici ce que j'ai entendu: %s", resp.transcript)
         if emotionToFrench(selectedEmotion) in resp.transcript :
             speechSay("Bien joué tu as trouvé la bonne expression")
