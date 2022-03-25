@@ -36,6 +36,8 @@ if __name__ == '__main__':
 
     try:
         # call a ros service with text message
+        emotionShow = rospy.ServiceProxy('/qt_robot/emotion/show', emotion_show)
+
         speechSay("Nous allons jouer à un jeu. Je vais te montrer une expression du devras me donner le nom de cette expression.")
         speechSay("Quel est cette expression? ")
         selectedEmotion = selectRandomEmotion()
