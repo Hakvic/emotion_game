@@ -38,7 +38,7 @@ if __name__ == '__main__':
         # call a ros service with text message
         emotionShow = rospy.ServiceProxy('/qt_robot/emotion/show', emotion_show)
 
-        speechSay("Nous allons jouer à un jeu. Je vais te montrer une expression du devras me donner le nom de cette expression.")
+        speechSay("Nous allons jouer à un jeu. Je vais te montrer une expression. Tu devras me donner le nom de cette expression.")
         speechSay("Quel est cette expression? ")
         selectedEmotion = selectRandomEmotion()
         emotionShow(selectedEmotion)
@@ -48,7 +48,7 @@ if __name__ == '__main__':
         if emotionToFrench(selectedEmotion) in resp.transcript :
             speechSay("Bien joué tu as trouvé la bonne expression")
         else:
-            speechSay("Ce n'est pas la bonne réponse, le nom de l'expression est %s",emotionToFrench(selectedEmotion))
+            speechSay("Ce n'est pas la bonne réponse, le nom de l'expression est %s"%emotionToFrench(selectedEmotion))
         
     except KeyboardInterrupt:
         pass
