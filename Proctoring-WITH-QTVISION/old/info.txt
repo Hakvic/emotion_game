@@ -1,0 +1,38 @@
+Autostart gspeech -> QTRP (Cf 1.3 gspeech doc)
+
+mdp isep invites:
+lake-5812-tasse-1217
+
+
+QTRP script OBLIGATOIRE :
+start_qt_routes.sh: prepares network routing between RPI and NUC for internet sharing and etc.
+start_roscore.sh: launches roscore
+start_qtpc.sh: power on NUC via wake-on-lan.
+start_qt_motor.sh: launch qt_motor node including motor and gesture controllers.
+start_qt_robot_interface.sh
++ qt bridge ?
+
+ssh developer@QTRP
+su qtrobot
+
+
+cd catkin_ws/src/
+ln -s /home/qtrobot/robot/code/tutorials/demos/qt_face_recognition
+cd ..
+catkin_make -j
+
+cd catkin_ws/
+roslaunch qt_face_recognition qt_face_recognition.launch
+or
+roslaunch qt_gesturegame_app qt_gesturegame_app.launch 
+
+
+
+
+ cd ~/.local/share/applications/
+gedit vision.dektop #Crée le fichier
+
+Aller sur le script python -> Permissions -> Allow executing file as program
+
+
+Poser des questions et attendre les réponses -> vérifier s'il y a une perte d'attention

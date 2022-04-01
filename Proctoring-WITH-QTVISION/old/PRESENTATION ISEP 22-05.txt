@@ -1,0 +1,19 @@
+
+
+####################### COMMANDE POUR REGLER LE SON ############################
+Volume <60 -> inaudible
+Volume 70 -> son faible
+Volume 80 -> son normal
+Volume 100 -> son fort
+
+rosservice call /qt_robot/setting/setVolume "volume: 80" 
+
+
+################ COMMANDE POUR REGLER FAIRE PARLER LE ROBOT #####################
+
+Texte à changer '  '
+
+rosservice call /qt_robot/speech/say "message: 'Bonjour, et bienvenu dans notre présentation. Vous êtes à lisep, une école dingénieur du numérique.'" 
+
+
+
