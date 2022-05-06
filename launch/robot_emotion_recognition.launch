@@ -1,0 +1,4 @@
+<launch>
+  <node name="robot_emotion_recognition" pkg="robot_emotion_recognition" type="robot_emotion_recognition.py" output="screen">
+  </node>
+</launch>

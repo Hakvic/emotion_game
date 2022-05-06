@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 import rospy
 import random
@@ -6,8 +7,8 @@ from qt_vosk_app.srv import *
 
 if __name__ == '__main__':
 
-    rospy.init_node('my_tutorial_node')
-    rospy.loginfo("my_tutorial_node started!")
+    rospy.init_node('robot_emotion_recognition')
+    rospy.loginfo("robot_emotion_recognition_node started!")
 
     # define a ros service
     speechSay = rospy.ServiceProxy('/qt_robot/speech/say', speech_say)
@@ -98,8 +99,8 @@ if __name__ == '__main__':
     try:
         # call a ros service with text message
 
-        #speechSay("Nous allons jouer à un jeu. Je vais te montrer une expression. Tu devras me donner le nom de cette expression.")
-        #speechSay("Quel est cette expression? ")
+        speechSay("Nous allons jouer à un jeu. Je vais te montrer une expression. Tu devras me donner le nom de cette expression.")
+        speechSay("Quel est cette expression? ")
         selectedEmotion = selectRandomEmotion()
         emotionShow(selectedEmotion)
         speechSay('#CAR HORN#')
