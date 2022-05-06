@@ -1,0 +1,9 @@
+<launch>
+  <node name="qt_image_recognition" pkg="qt_image_recognition" type="qt_image_recognition.py" output="screen">
+  </node>
+
+  <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
+      <remap from="image" to="/face_recognition/out"/>
+      <param name="autosize" value="false" />
+    </node>
+</launch>
