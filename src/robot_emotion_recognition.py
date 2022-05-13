@@ -2,6 +2,7 @@
 import sys
 import rospy
 import random
+import threading
 from qt_robot_interface.srv import *
 from qt_vosk_app.srv import *
 from std_msgs.msg import String
@@ -28,7 +29,7 @@ if __name__ == '__main__':
         "triste":["triste","abattu", "accablé", "affecté", "affligé","anéanti", "angoissé", "atterré","attristé", "bouleversé", "chagriné",
                     "chagriné", "consterné", "découragé", "défait", "déprimé", "désabusé", "désenchanté", "désespéré", "émouvant",
                     "malheureux", "maussade", "mauvais", "navré", "peiné"],
-        "enervé":["enervé","agacé", "agité", "à bout de nerfs", "crispé", "exaspéré", "irrité", "nerveux", "sur les nerfs", "sous pression"]
+        "enervé":["enervé","agacé", "agité", "à bout de nerfs", "crispé", "exaspéré", "irrité", "nerveux", "sur les nerfs", "sous pression","colère"]
     }
     
     def selectRandomEmotion(): 
@@ -101,29 +102,31 @@ if __name__ == '__main__':
 
     try:
         # call a ros service with text message
+        rounds = 3
+        speechSay("Nous allons jouer à un jeu. Je vais te montrer une expression. Après le bip, tu devras me donner le nom de cette expression.")
+        while (rounds>0):
+            speechSay("Quel est cette expression? ")
+            selectedEmotion = selectRandomEmotion()
+            emotionShow(selectedEmotion)
 
-        #speechSay("Nous allons jouer à un jeu. Je vais te montrer une expression. Tu devras me donner le nom de cette expression après le bip.")
-        #speechSay("Quel est cette expression? ")
-        selectedEmotion = selectRandomEmotion()
-        emotionShow(selectedEmotion)
-        
-        audioPlay("beep-01a.wav","")
-
-        resp = recognize("fr_FR", [""], 15)
-        rospy.loginfo("Voici ce que j'ai entendu: %s", resp.transcript)
-        if emotionFound(selectedEmotion,resp.transcript) is True:
-            speechSay("Bien joué tu as trouvé la bonne expression")
-        else:
-            speechSay("Ce n'est pas la bonne expression! Je vais te donner un indice.")
-            speechSay(giveHint(selectedEmotion))
             audioPlay("beep-01a.wav","")
+
             resp = recognize("fr_FR", [""], 15)
             rospy.loginfo("Voici ce que j'ai entendu: %s", resp.transcript)
-            if emotionFound(selectedEmotion, resp.transcript) is True:
+            if emotionFound(selectedEmotion,resp.transcript) is True:
                 speechSay("Bien joué tu as trouvé la bonne expression")
             else:
-                speechSay("Ce n'est pas la bonne réponse, le nom de l'expression est %s"%emotionToFrench(selectedEmotion))
-        
+                speechSay("Ce n'est pas la bonne expression! Je vais te donner un indice.")
+                speechSay(giveHint(selectedEmotion))
+                audioPlay("beep-01a.wav","")
+                resp = recognize("fr_FR", [""], 15)
+                rospy.loginfo("Voici ce que j'ai entendu: %s", resp.transcript)
+                if emotionFound(selectedEmotion, resp.transcript) is True:
+                    speechSay("Bien joué tu as trouvé la bonne expression")
+                else:
+                    speechSay("Ce n'est pas la bonne réponse, le nom de l'expression est %s"%emotionToFrench(selectedEmotion))
+            rounds = rounds-1
+
     except KeyboardInterrupt:
         pass
 
