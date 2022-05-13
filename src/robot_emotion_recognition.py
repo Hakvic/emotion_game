@@ -4,6 +4,7 @@ import rospy
 import random
 from qt_robot_interface.srv import *
 from qt_vosk_app.srv import *
+from std_msgs.msg import String
 
 if __name__ == '__main__':
 
@@ -14,10 +15,12 @@ if __name__ == '__main__':
     speechSay = rospy.ServiceProxy('/qt_robot/speech/say', speech_say)
     recognize = rospy.ServiceProxy('/qt_robot/speech/recognize', speech_recognize)
     emotionShow = rospy.ServiceProxy('/qt_robot/emotion/show', emotion_show)
+    audioPlay = rospy.ServiceProxy('/qt_robot/audio/play', audio_play)
 
     # block/wait for ros service
     rospy.wait_for_service('/qt_robot/speech/say')
     rospy.wait_for_service('/qt_robot/speech/recognize')
+    rospy.wait_for_service('/qt_robot/audio/play')
 
     emotionDictionnary = {
         "joyeux" : ["joyeux","allègre", "enjoué", "épanoui", "euphorique", "gai", "guilleret", "heureux", "hilare", "jovial", "radieux", "ravi", "réjoui", "riant" ],
@@ -99,11 +102,13 @@ if __name__ == '__main__':
     try:
         # call a ros service with text message
 
-        speechSay("Nous allons jouer à un jeu. Je vais te montrer une expression. Tu devras me donner le nom de cette expression.")
-        speechSay("Quel est cette expression? ")
+        #speechSay("Nous allons jouer à un jeu. Je vais te montrer une expression. Tu devras me donner le nom de cette expression après le bip.")
+        #speechSay("Quel est cette expression? ")
         selectedEmotion = selectRandomEmotion()
         emotionShow(selectedEmotion)
-        speechSay('#CAR HORN#')
+        
+        audioPlay("beep-01a.wav","")
+
         resp = recognize("fr_FR", [""], 15)
         rospy.loginfo("Voici ce que j'ai entendu: %s", resp.transcript)
         if emotionFound(selectedEmotion,resp.transcript) is True:
@@ -111,7 +116,7 @@ if __name__ == '__main__':
         else:
             speechSay("Ce n'est pas la bonne expression! Je vais te donner un indice.")
             speechSay(giveHint(selectedEmotion))
-            speechSay('#CAR HORN#')
+            audioPlay("beep-01a.wav","")
             resp = recognize("fr_FR", [""], 15)
             rospy.loginfo("Voici ce que j'ai entendu: %s", resp.transcript)
             if emotionFound(selectedEmotion, resp.transcript) is True:
