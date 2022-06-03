@@ -11,51 +11,54 @@ from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from std_msgs.msg import Float32MultiArray
+from qt_vosk_app.srv import *
 
 
 class ImageRecognition:
     frames = 0
     tries = 0
     pictrogram_ids = {
-        10:"Drôle",
-    11:"Exité",
-    12:"Heureux",
-    13:"Calme",
-    14: "Timide" ,
-    15:"Triste",
-   16:"Fatigué",
-    17:"Surpris",
-    18:"Deçu",
-    19:"Anxieux",
-    20:"Contrarié",
-    21:"Apeuré" ,
-    22:"Méprisant",
-  23:"Entêté",
-   24: "Fâché",
-   25: "Frustré",
+        10: "Drôle",
+        11: "Exité",
+        12: "Heureux",
+        13: "Calme",
+        14: "Timide",
+        15: "Triste",
+        16: "Fatigué",
+        17: "Surpris",
+        18: "Deçu",
+        19: "Anxieux",
+        20: "Contrarié",
+        21: "Apeuré",
+        22: "Méprisant",
+        23: "Entêté",
+        24: "Fâché",
+        25: "Frustré",
     }
 
     def __init__(self):
 
+        self.round = 1
         self.lock = threading.Lock()
         self.bridge = CvBridge()
         self.image_pub = rospy.Publisher("/face_recognition/out", Image, queue_size=1)
         self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.callback)
         self.object_sub = rospy.Subscriber('/find_object/objects', Float32MultiArray, self.image_callback)
-        self.speechSay_pub = rospy.Publisher('/qt_robot/speech/say', String,queue_size=10)
-        self.emotionShow_pub = rospy.Publisher('/qt_robot/emotion/show', String,queue_size=20)
+        self.speechSay_pub = rospy.Publisher('/qt_robot/speech/say', String, queue_size=10)
+        self.emotionShow_pub = rospy.Publisher('/qt_robot/emotion/show', String, queue_size=20)
+        self.recognize = rospy.ServiceProxy('/qt_robot/speech/recognize', speech_recognize)
         self.emotion_id = random.randrange(10, 28)
         self.foundFlag = False
         self.start_game()
 
-
-
     def start_game(self):
         try:
+            time.sleep(2)
+            self.speak(
+                "Voici les règles du nouveau jeu. Je vais te donner le nom d'une expression et du devras me montrer l'image.")
             self.speak("Montre moi l'émotion %s" % self.pictrogram_ids[self.emotion_id])
-
-
             rospy.spin()
+
         except KeyboardInterrupt:
             print("Shutting down")
 
@@ -67,7 +70,6 @@ class ImageRecognition:
                 rospy.logerr("Connection with publisher failed...")
                 exit()
             rospy.sleep(1)
-        print(message)
         self.speechSay_pub.publish(message)
 
     def show_image(self, image):
@@ -84,37 +86,36 @@ class ImageRecognition:
 
         self.frames += 1
         secondes = self.frames // 27
-        print(secondes)
 
         if secondes == 15 and self.foundFlag is False:
             self.speak("Je n'arrive pas à detecter l'image. Essaie de la rapprocher!")
-            self.frames =0
+            self.frames = 0
 
         if self.tries == 3:
+            self.round = self.round - 1
             self.tries = 0
             self.speak("Voici l'image qu'il fallait trouver.")
-            self.show_image('pictogram_expression/'+self.pictrogram_ids[self.emotion_id])
+            self.show_image('pictogram_expression/' + self.pictrogram_ids[self.emotion_id])
             time.sleep(10)
 
             self.restart_game()
-            self.tries=0
+            self.tries = 0
 
         showImageId = str(msg.data).split(".")[0][1::]
-        print(showImageId)
 
-        if showImageId.isdigit() and (self.frames/10)%5==0:
+        if showImageId.isdigit() and (self.frames / 10) % 5 == 0:
             if int(showImageId) == self.emotion_id and self.foundFlag is False:
                 self.foundFlag = True
 
                 self.speak("Bravo tu as trouvé l'image!")
                 time.sleep(5)
-                self.tries=0
+                self.tries = 0
                 self.restart_game()
+                self.round = self.round - 1
 
             else:
                 self.speak("Ce n'est pas la bonne image.")
-                self.tries+= 1
-                print(100 + self.tries)
+                self.tries += 1
 
             self.frames = 0
 
@@ -122,12 +123,18 @@ class ImageRecognition:
             print("Pas d'id.")
 
     def restart_game(self):
-        self.lock.acquire()
-        self.foundFlag=False
+        if self.round > 0:
+            time.sleep(10)
+            self.lock.acquire()
+            self.foundFlag = False
 
-        self.emotion_id = random.randrange(10, 28)
-        self.speak("Je vais te montrer une nouvelle émotion. Montre moi l'émotion%s" % self.pictrogram_ids[self.emotion_id])
-        self.lock.release()
+            self.emotion_id = random.randrange(10, 28)
+            self.speak("Je vais te montrer une nouvelle émotion. Montre moi l'émotion%s" % self.pictrogram_ids[
+                self.emotion_id])
+            self.lock.release()
+        else:
+            self.speak("Merci d'avoir joué avec moi. Au revoir !")
+            rospy.signal_shutdown("end game")
 
     def callback(self, data):
 
@@ -139,4 +146,3 @@ class ImageRecognition:
             self.image_pub.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
         except CvBridgeError as e:
             print(e)
-

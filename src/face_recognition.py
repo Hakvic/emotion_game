@@ -11,7 +11,6 @@ from cv_bridge import CvBridge, CvBridgeError
 from qt_nuitrack_app.msg import Faces, FaceInfo
 
 
-
 class FaceRecognition(threading.Thread):
     faces = None
     faces_time = None
