@@ -18,7 +18,7 @@ emotionDictionnary = {
                "chagriné", "consterné", "découragé", "défait", "déprimé", "désabusé", "désenchanté", "désespéré",
                "émouvant",
                "malheureux", "maussade", "mauvais", "navré", "peiné"],
-    "enervé": ["enervé", "agacé", "agité", "à bout de nerfs", "crispé", "exaspéré", "irrité", "nerveux",
+    "enervé": ["enerver", "agacé", "agité", "à bout de nerfs", "crispé", "exaspéré", "irrité", "nerveux",
                "sur les nerfs", "sous pression", "colère"]
 }
 
@@ -29,6 +29,9 @@ class EmotionRecognition:
         Initialize the different rospy service
         """
         # define a ros service
+        rospy.init_node('emotion_game')
+        rospy.loginfo("emotion_node started!")
+
         self.speechSay = rospy.ServiceProxy('/qt_robot/speech/say', speech_say)
         self.recognize = rospy.ServiceProxy('/qt_robot/speech/recognize', speech_recognize)
         self.emotionShow = rospy.ServiceProxy('/qt_robot/emotion/show', emotion_show)
@@ -177,18 +180,18 @@ class EmotionRecognition:
         time.sleep(5)
 
         self.speechSay("Est-tu placé?")
-        respIsReady = self.recognize("fr_FR", ['oui'], 5)
-        rospy.loginfo("Voici ce que j'ai entendu: %s", respIsReady.transcript)
+        resp_ready = self.recognize("fr_FR", ['oui'], 5)
+        rospy.loginfo("Voici ce que j'ai entendu: %s", resp_ready.transcript)
 
         while not gameStarted:
 
-            if respIsReady.transcript == "oui":
+            if resp_ready.transcript == "oui":
                 gameStarted = True
             else:
-                rospy.loginfo("I got: %s", respIsReady.transcript)
+                rospy.loginfo("I got: %s", resp_ready.transcript)
                 self.speechSay("Je n'ai pas bien entendu. Est-tu placé?")
-                del respIsReady
-                respIsReady = self.recognize("fr_FR", ['oui'], 5)
+                del resp_ready
+                resp_ready = self.recognize("fr_FR", ['oui'], 5)
 
         self.speechSay("Voici comment fonctionne le jeu,"
                        "je vais te montrer une expression. "

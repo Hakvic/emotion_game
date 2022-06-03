@@ -39,6 +39,7 @@ class ImageRecognition:
     def __init__(self):
 
         self.round = 1
+        self.previous_id = 0
         self.lock = threading.Lock()
         self.bridge = CvBridge()
         self.image_pub = rospy.Publisher("/face_recognition/out", Image, queue_size=1)
@@ -47,9 +48,8 @@ class ImageRecognition:
         self.speechSay_pub = rospy.Publisher('/qt_robot/speech/say', String, queue_size=10)
         self.emotionShow_pub = rospy.Publisher('/qt_robot/emotion/show', String, queue_size=20)
         self.recognize = rospy.ServiceProxy('/qt_robot/speech/recognize', speech_recognize)
-        self.emotion_id = random.randrange(10, 28)
+        self.emotion_id = random.randrange(10, 25)
         self.foundFlag = False
-        self.start_game()
 
     def start_game(self):
         try:
@@ -102,25 +102,28 @@ class ImageRecognition:
             self.tries = 0
 
         showImageId = str(msg.data).split(".")[0][1::]
+        print(showImageId)
 
-        if showImageId.isdigit() and (self.frames / 10) % 5 == 0:
-            if int(showImageId) == self.emotion_id and self.foundFlag is False:
-                self.foundFlag = True
+        if showImageId.isdigit():
+            if int(showImageId) != self.previous_id:
+                if int(showImageId) == self.emotion_id and self.foundFlag is False:
+                    self.foundFlag = True
 
-                self.speak("Bravo tu as trouvé l'image!")
-                time.sleep(5)
-                self.tries = 0
-                self.restart_game()
-                self.round = self.round - 1
+                    self.speak("Bravo tu as trouvé l'image!")
+                    time.sleep(5)
+                    self.tries = 0
+                    self.restart_game()
+                    self.round = self.round - 1
+
+                else:
+                    self.speak("Ce n'est pas la bonne image.")
+                    self.tries += 1
+
+                self.frames = 0
 
             else:
-                self.speak("Ce n'est pas la bonne image.")
-                self.tries += 1
-
-            self.frames = 0
-
-        else:
-            print("Pas d'id.")
+                print("Pas d'id.")
+            self.previous_id = int(showImageId)
 
     def restart_game(self):
         if self.round > 0:
