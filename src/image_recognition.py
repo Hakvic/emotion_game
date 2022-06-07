@@ -37,7 +37,6 @@ class ImageRecognition:
     }
 
     def __init__(self):
-
         self.round = 1
         self.previous_id = 0
         self.lock = threading.Lock()
@@ -52,10 +51,14 @@ class ImageRecognition:
         self.foundFlag = False
 
     def start_game(self):
+        """
+        Start the game.
+        :return:
+        """
         try:
             time.sleep(2)
-            self.speak(
-                "Voici les règles du nouveau jeu. Je vais te donner le nom d'une expression et du devras me montrer l'image.")
+            self.speak("Voici les règles du nouveau jeu. Je vais te donner le nom d'une expression et du devras me "
+                       "montrer l'image.")
             self.speak("Montre moi l'émotion %s" % self.pictrogram_ids[self.emotion_id])
             rospy.spin()
 
@@ -63,7 +66,12 @@ class ImageRecognition:
             print("Shutting down")
 
     def speak(self, message):
-        # On attend la connexion
+        """
+        That is an other method to use the SpeechSay with the publisher.
+        Connection to the speechSay publisher. To the robot talk.
+
+        :param message: str, what you want the robot says.
+        """
         date_debut = rospy.get_time()
         while self.speechSay_pub.get_num_connections() == 0:
             if rospy.get_time() - date_debut > 5.0:
@@ -73,9 +81,13 @@ class ImageRecognition:
         self.speechSay_pub.publish(message)
 
     def show_image(self, image):
-        # On attend la connexion
+        """
+        Connection with the emotionShow publisher. To display an image on the head on the robot
+
+        :param image: str, path to the image.
+        """
         date_debut = rospy.get_time()
-        while (self.emotionShow_pub.get_num_connections() == 0):
+        while self.emotionShow_pub.get_num_connections() == 0:
             if rospy.get_time() - date_debut > 5.0:
                 rospy.logerr("Connection with publisher failed...")
                 exit()
@@ -83,7 +95,11 @@ class ImageRecognition:
         self.emotionShow_pub.publish(image)
 
     def image_callback(self, msg):
+        """
+        Callback used to detect the image show by the kid to the robot and to check if the expression match the image.
 
+        :param msg: Float32MultiArray, information on the image show by the kid from the message std_msgs.msg
+        """
         self.frames += 1
         secondes = self.frames // 27
 
@@ -101,12 +117,12 @@ class ImageRecognition:
             self.restart_game()
             self.tries = 0
 
-        showImageId = str(msg.data).split(".")[0][1::]
-        print(showImageId)
+        show_image_id = str(msg.data).split(".")[0][1::]
+        print(show_image_id)
 
-        if showImageId.isdigit():
-            if int(showImageId) != self.previous_id:
-                if int(showImageId) == self.emotion_id and self.foundFlag is False:
+        if show_image_id.isdigit():
+            if int(show_image_id) != self.previous_id:
+                if int(show_image_id) == self.emotion_id and self.foundFlag is False:
                     self.foundFlag = True
 
                     self.speak("Bravo tu as trouvé l'image!")
@@ -123,9 +139,12 @@ class ImageRecognition:
 
             else:
                 print("Pas d'id.")
-            self.previous_id = int(showImageId)
+            self.previous_id = int(show_image_id)
 
     def restart_game(self):
+        """
+        Restart the game
+        """
         if self.round > 0:
             time.sleep(10)
             self.lock.acquire()
@@ -140,7 +159,12 @@ class ImageRecognition:
             rospy.signal_shutdown("end game")
 
     def callback(self, data):
+        """
+        Callback used to get the camera feedback in live.
 
+        :param data: Image, image of the camera from the message sensor_msgs.msg
+        :return:
+        """
         try:
             cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError as e:

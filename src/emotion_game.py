@@ -144,13 +144,13 @@ class EmotionRecognition:
 
         :param selected_emotion: str, the path of the emotion chosen by the robot
         """
-        face_recongnition = FaceRecognition()
-        face_recongnition.start()
+        face_recognition = FaceRecognition()
+        face_recognition.start()
         self.emotionShow(selected_emotion)
-        if not face_recongnition.isFocused:
+        if not face_recognition.is_focused:
             self.speechSay("Je vais te remontrer l'expression")
             self.emotionShow(selected_emotion)
-        face_recongnition.stop()
+        face_recognition.stop()
 
     def speech_to_text(self):
         """
@@ -174,7 +174,7 @@ class EmotionRecognition:
         """
         rounds = 2
         next_game = True
-        gameStarted = False
+        game_started = False
         self.speechSay("Nous allons jouer à un jeu.")
         self.speechSay("Avant de commencer, pourrai-tu te placer à 1 mètre de moi ?")
         time.sleep(5)
@@ -183,10 +183,10 @@ class EmotionRecognition:
         resp_ready = self.recognize("fr_FR", ['oui'], 5)
         rospy.loginfo("Voici ce que j'ai entendu: %s", resp_ready.transcript)
 
-        while not gameStarted:
+        while not game_started:
 
             if resp_ready.transcript == "oui":
-                gameStarted = True
+                game_started = True
             else:
                 rospy.loginfo("I got: %s", resp_ready.transcript)
                 self.speechSay("Je n'ai pas bien entendu. Est-tu placé?")
@@ -197,22 +197,22 @@ class EmotionRecognition:
                        "je vais te montrer une expression. "
                        "Après le bip, tu devras me donner le nom de cette expression.")
 
-        while (rounds > 0):
+        while rounds > 0:
             self.game()
             rounds = rounds - 1
 
         time.sleep(5)
 
-        while (next_game):
+        while next_game:
             self.speechSay("Veux-tu changer de jeu ?")
-            respIsReady = self.recognize("fr_FR", ['oui'], 5)
-            rospy.loginfo("Voici ce que j'ai entendu: %s", respIsReady.transcript)
+            resp_is_ready = self.recognize("fr_FR", ['oui'], 5)
+            rospy.loginfo("Voici ce que j'ai entendu: %s", resp_is_ready.transcript)
 
-            if respIsReady.transcript == "oui":
+            if resp_is_ready.transcript == "oui":
                 ir = ImageRecognition()
                 ir.start_game()
                 next_game = False
-            elif respIsReady.transcript == "non":
+            elif resp_is_ready.transcript == "non":
                 self.speechSay("Merci d'avoir joué avec moi !")
                 rospy.signal_shutdown("end game")
                 next_game = False
@@ -223,30 +223,30 @@ class EmotionRecognition:
         emotion.
         """
         self.speechSay("Quel est cette expression?")
-        selectedEmotion = self.select_random_emotion()
-        while self.previousEmotion == selectedEmotion:
-            selectedEmotion = self.select_random_emotion()
+        selected_emotion = self.select_random_emotion()
+        while self.previousEmotion == selected_emotion:
+            selected_emotion = self.select_random_emotion()
 
-        self.previousEmotion = selectedEmotion
+        self.previousEmotion = selected_emotion
 
-        self.show_emotion(selectedEmotion)
+        self.show_emotion(selected_emotion)
 
         self.audioPlay("beep-01a.wav", "")
         words_said = self.speech_to_text()
 
-        if self.emotion_found(selectedEmotion, words_said) is True:
+        if self.emotion_found(selected_emotion, words_said) is True:
             self.speechSay("Bien joué tu as trouvé la bonne expression")
         else:
             self.speechSay("Ce n'est pas la bonne expression! Je vais te donner un indice.")
-            self.speechSay(self.give_hint(selectedEmotion))
+            self.speechSay(self.give_hint(selected_emotion))
             words_said = self.speech_to_text()
 
-            if self.emotion_found(selectedEmotion, words_said) is True:
+            if self.emotion_found(selected_emotion, words_said) is True:
                 self.speechSay("Bien joué tu as trouvé la bonne expression")
             else:
                 self.speechSay(
                     "Ce n'est pas la bonne réponse, le nom de l'expression est %s" % self.emotion_to_french(
-                        selectedEmotion))
+                        selected_emotion))
 
 
 if __name__ == '__main__':
