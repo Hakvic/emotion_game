@@ -37,7 +37,7 @@ class ImageRecognition:
     }
 
     def __init__(self):
-        self.round = 1
+        self.round = 2
         self.previous_id = 0
         self.lock = threading.Lock()
         self.bridge = CvBridge()
@@ -56,7 +56,7 @@ class ImageRecognition:
         :return:
         """
         try:
-            time.sleep(2)
+            time.sleep(5)
             self.speak("Voici les règles du nouveau jeu. Je vais te donner le nom d'une expression et du devras me "
                        "montrer l'image.")
             self.speak("Montre moi l'émotion %s" % self.pictrogram_ids[self.emotion_id])
@@ -136,10 +136,11 @@ class ImageRecognition:
                     self.tries += 1
 
                 self.frames = 0
-
-            else:
-                print("Pas d'id.")
             self.previous_id = int(show_image_id)
+
+        else:
+            print("Pas d'image détectée.")
+
 
     def restart_game(self):
         """
@@ -150,7 +151,7 @@ class ImageRecognition:
             self.lock.acquire()
             self.foundFlag = False
 
-            self.emotion_id = random.randrange(10, 28)
+            self.emotion_id = random.randrange(10, 25)
             self.speak("Je vais te montrer une nouvelle émotion. Montre moi l'émotion%s" % self.pictrogram_ids[
                 self.emotion_id])
             self.lock.release()

@@ -18,7 +18,7 @@ emotionDictionnary = {
                "chagriné", "consterné", "découragé", "défait", "déprimé", "désabusé", "désenchanté", "désespéré",
                "émouvant",
                "malheureux", "maussade", "mauvais", "navré", "peiné"],
-    "enervé": ["enerver", "agacé", "agité", "à bout de nerfs", "crispé", "exaspéré", "irrité", "nerveux",
+    "enervé": ["énervé", "agacé", "agité", "à bout de nerfs", "crispé", "exaspéré", "irrité", "nerveux",
                "sur les nerfs", "sous pression", "colère"]
 }
 
@@ -159,12 +159,15 @@ class EmotionRecognition:
         :rtype: str
         :return: The transcription of the voice
         """
+
+        self.audioPlay("beep-01a.wav", "")
         resp = self.recognize("fr_FR", [""], 10)
         while resp.transcript == "#TIMEOUT#":
             rospy.loginfo("Voici ce que j'ai entendu: %s", resp.transcript)
-            del resp
             self.speechSay("Je n'ai pas très bien entendu, pourrai-tu répéter ?")
             resp = self.recognize("fr_FR", [""], 10)
+        rospy.loginfo("Voici ce que j'ai entendu: %s", resp.transcript)
+
         return resp.transcript
 
     def start_game(self):
@@ -185,12 +188,11 @@ class EmotionRecognition:
 
         while not game_started:
 
-            if resp_ready.transcript == "oui":
+            if "oui" in resp_ready.transcript:
                 game_started = True
             else:
                 rospy.loginfo("I got: %s", resp_ready.transcript)
                 self.speechSay("Je n'ai pas bien entendu. Est-tu placé?")
-                del resp_ready
                 resp_ready = self.recognize("fr_FR", ['oui'], 5)
 
         self.speechSay("Voici comment fonctionne le jeu,"
@@ -201,18 +203,18 @@ class EmotionRecognition:
             self.game()
             rounds = rounds - 1
 
-        time.sleep(5)
+        time.sleep(3)
 
         while next_game:
             self.speechSay("Veux-tu changer de jeu ?")
             resp_is_ready = self.recognize("fr_FR", ['oui'], 5)
             rospy.loginfo("Voici ce que j'ai entendu: %s", resp_is_ready.transcript)
 
-            if resp_is_ready.transcript == "oui":
+            if "oui" in resp_is_ready.transcript:
                 ir = ImageRecognition()
                 ir.start_game()
                 next_game = False
-            elif resp_is_ready.transcript == "non":
+            elif "non" in resp_is_ready.transcript:
                 self.speechSay("Merci d'avoir joué avec moi !")
                 rospy.signal_shutdown("end game")
                 next_game = False
@@ -231,18 +233,19 @@ class EmotionRecognition:
 
         self.show_emotion(selected_emotion)
 
-        self.audioPlay("beep-01a.wav", "")
+
         words_said = self.speech_to_text()
 
+
         if self.emotion_found(selected_emotion, words_said) is True:
-            self.speechSay("Bien joué tu as trouvé la bonne expression")
+            self.speechSay("Bien joué tu as trouvé la bonne expression!")
         else:
             self.speechSay("Ce n'est pas la bonne expression! Je vais te donner un indice.")
             self.speechSay(self.give_hint(selected_emotion))
             words_said = self.speech_to_text()
 
             if self.emotion_found(selected_emotion, words_said) is True:
-                self.speechSay("Bien joué tu as trouvé la bonne expression")
+                self.speechSay("Bien joué tu as trouvé la bonne expression!")
             else:
                 self.speechSay(
                     "Ce n'est pas la bonne réponse, le nom de l'expression est %s" % self.emotion_to_french(

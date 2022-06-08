@@ -126,7 +126,7 @@ class FaceRecognition(threading.Thread):
                                   (x + 80 + 100, y + h + 10 + 110), (255, 255, 255), 1)
                     # Face angle
                     print('face orientation: ', face.angles)
-                    if -5 > face.angles[0] > -16:
+                    if 10 > face.angles[0] > -16:
                         print("Regarde tout droit")
                     elif face.angles[0] > 10:
                         self.is_focused = False
