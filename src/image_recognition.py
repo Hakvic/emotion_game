@@ -152,7 +152,7 @@ class ImageRecognition:
             self.foundFlag = False
 
             self.emotion_id = random.randrange(10, 25)
-            self.speak("Je vais te montrer une nouvelle émotion. Montre moi l'émotion%s" % self.pictrogram_ids[
+            self.speak("Je vais te donner une nouvelle émotion. Montre moi l'émotion%s" % self.pictrogram_ids[
                 self.emotion_id])
             self.lock.release()
         else:

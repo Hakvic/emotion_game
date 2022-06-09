@@ -10,7 +10,7 @@ from image_recognition import ImageRecognition
 
 emotionDictionnary = {
     "joyeux": ["joyeux", "allègre", "enjoué", "épanoui", "euphorique", "gai", "guilleret", "heureux", "hilare",
-               "jovial", "radieux", "ravi", "réjoui", "riant"],
+               "jovial", "radieux", "ravi", "réjoui", "riant", "content"],
     "surpris": ["surpris", "ahuri", "bouche bée", "coi", "déconcerté", "ébahi", "éberlué", "étonné", "médusé",
                 "stupéfait", "suffoqué", "épaté", "époustouflé", "estomaqué", "scié", "sidéré"],
     "triste": ["triste", "abattu", "accablé", "affecté", "affligé", "anéanti", "angoissé", "atterré", "attristé",
@@ -183,17 +183,19 @@ class EmotionRecognition:
         time.sleep(5)
 
         self.speechSay("Est-tu placé?")
-        resp_ready = self.recognize("fr_FR", ['oui'], 5)
+        resp_ready = self.recognize("fr_FR", ['oui','non'], 7)
         rospy.loginfo("Voici ce que j'ai entendu: %s", resp_ready.transcript)
+
 
         while not game_started:
 
             if "oui" in resp_ready.transcript:
                 game_started = True
             else:
+                time.sleep(5)
                 rospy.loginfo("I got: %s", resp_ready.transcript)
                 self.speechSay("Je n'ai pas bien entendu. Est-tu placé?")
-                resp_ready = self.recognize("fr_FR", ['oui'], 5)
+                resp_ready = self.recognize("fr_FR", ['oui','non'], 7)
 
         self.speechSay("Voici comment fonctionne le jeu,"
                        "je vais te montrer une expression. "
@@ -207,7 +209,7 @@ class EmotionRecognition:
 
         while next_game:
             self.speechSay("Veux-tu changer de jeu ?")
-            resp_is_ready = self.recognize("fr_FR", ['oui'], 5)
+            resp_is_ready = self.recognize("fr_FR", ['oui','non'], 7)
             rospy.loginfo("Voici ce que j'ai entendu: %s", resp_is_ready.transcript)
 
             if "oui" in resp_is_ready.transcript:
